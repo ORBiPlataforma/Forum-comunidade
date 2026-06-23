@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fórum de Dúvidas — Comunidade ORBi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yellow: #F5C400;
+    --yellow-light: #FFF8CC;
+    --black: #1a1a1a;
+    --bg: #f5f5f3;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.10);
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --text-faint: #9b9b9b;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .site-header { background: var(--black); padding: 1.75rem 1.5rem 0; position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 780px; margin: 0 auto; }
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+
+  .logo-text h1 { font-size: 17px; font-weight: 600; color: #fff; letter-spacing: -0.3px; line-height: 1.2; }
+  .logo-text p { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+
+
+  .search-wrap { position: relative; }
+  #searchInput::placeholder { color: rgba(255,255,255,0.35); }
+  #searchInput:focus { border-color: var(--yellow) !important; }
+
+  /* MAIN */
+  .main { max-width: 780px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; }
+
+
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; text-align: center; }
+  .stat-n { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-l { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .pill { font-size: 12px; font-family: inherit; padding: 6px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all .15s; white-space: nowrap; line-height: 1; }
+  .pill:hover { border-color: var(--yellow); color: var(--black); }
+  .pill.active { background: var(--yellow); color: var(--black); border-color: var(--yellow); font-weight: 600; }
+
+  /* RESULTS COUNT */
+  .results-count { font-size: 12px; color: var(--text-faint); margin-bottom: .75rem; min-height: 18px; }
+
+  /* ENTRIES */
+  .entry-list { display: flex; flex-direction: column; gap: 8px; }
+  .entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transition: border-color .15s; }
+  .entry:hover { border-color: rgba(245,196,0,0.5); }
+  .entry.open { border-color: var(--yellow); }
+  .entry-head { padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px; }
+  .entry-cat { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; letter-spacing: 0.2px; text-transform: uppercase; }
+  .cat-cme      { background: #FFF4CC; color: #7a5800; }
+  .cat-ars      { background: #E1F5EE; color: #0a5a3f; }
+  .cat-visa     { background: #E6F1FB; color: #144e8a; }
+  .cat-acesso   { background: #FAEEDA; color: #6e3f08; }
+  .cat-norma    { background: #FBEAF0; color: #7a2044; }
+  .cat-dimensao { background: #EEEDFE; color: #3d2e9a; }
+  .cat-acabamento { background: #EAF3DE; color: #2d5a0e; }
+  .cat-infra    { background: #FCEBEB; color: #8a2020; }
+  .cat-especial { background: #F1EFE8; color: #4a4940; }
+  .cat-negocio  { background: #FAECE7; color: #7a2e10; }
+  .entry-q { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; line-height: 1.5; }
+  .entry-chevron { color: var(--text-faint); font-size: 16px; flex-shrink: 0; margin-top: 1px; transition: transform .2s; line-height: 1; user-select: none; }
+  .entry.open .entry-chevron { transform: rotate(180deg); }
+  .entry-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .entry.open .entry-body { display: block; }
+  .entry-answer { font-size: 13.5px; color: var(--text-muted); line-height: 1.75; margin-top: 13px; }
+  .entry-footer { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .footer-icon { width: 14px; height: 14px; color: var(--text-faint); flex-shrink: 0; }
+  .ref-tag { background: var(--bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; font-size: 11px; color: var(--text-muted); }
+  .esp-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--yellow-light); color: #7a5800; margin-left: auto; font-weight: 500; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-faint); }
+  .empty svg { width: 32px; height: 32px; margin: 0 auto 12px; display: block; opacity: 0.4; }
+  .empty p { font-size: 14px; line-height: 1.6; }
+
+  /* ── FORUM ── */
+  .forum-header { margin-bottom: 1.25rem; }
+  .forum-header h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .forum-header p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* STATUS FILTERS */
+  .status-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .status-pill { font-size: 12px; font-family: inherit; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all .15s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+  .status-pill:hover { border-color: var(--yellow); }
+  .status-pill.active { background: var(--yellow); color: var(--black); border-color: var(--yellow); font-weight: 600; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-recebida  { background: #9b9b9b; }
+  .dot-analise   { background: #F5C400; }
+  .dot-respondida{ background: #22c55e; }
+
+  /* FORUM CARDS */
+  .forum-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+  .forum-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; }
+  .forum-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .forum-q { font-size: 14px; font-weight: 500; line-height: 1.5; flex: 1; }
+  .status-badge { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.3px; display: flex; align-items: center; gap: 4px; }
+  .badge-recebida   { background: #f1f1ef; color: #6b6b6b; }
+  .badge-analise    { background: #FFF8CC; color: #7a5800; }
+  .badge-respondida { background: #dcfce7; color: #166534; }
+  .forum-meta { font-size: 12px; color: var(--text-faint); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .forum-meta span { display: flex; align-items: center; gap: 4px; }
+  .forum-answer { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+  .forum-answer-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+
+  /* FORM */
+
+  /* FOOTER */
+  .site-footer { text-align: center; padding: 1rem; font-size: 11px; color: var(--text-faint); }
+  .site-footer span { display: inline-block; width: 8px; height: 8px; background: var(--yellow); border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+  @media (max-width: 540px) {
+    .stats-row { gap: 6px; }
+    .stat-n { font-size: 20px; }
+    .tab-btn { padding: 10px 14px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <img src="data:image/png;base64,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" alt="ORBi" style="height:36px;width:auto;flex-shrink:0;">
+      <div class="logo-text">
+        <h1>Fórum de Dúvidas</h1>
+        <p>Comunidade ORBi</p>
+      </div>
+    </div>
+
+    <div class="search-wrap" style="margin-top:1rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.35);width:16px;height:16px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar por tema, norma, ambiente, cidade..." autocomplete="off" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:8px;padding:10px 14px 10px 42px;font-size:14px;font-family:inherit;outline:none;">
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-n" id="totalN">0</div><div class="stat-l">dúvidas respondidas</div></div>
+      <div class="stat-card"><div class="stat-n">10</div><div class="stat-l">categorias</div></div>
+      <div class="stat-card"><div class="stat-n">15+</div><div class="stat-l">especialidades</div></div>
+    </div>
+
+    <div class="filters" id="filterCats" role="group" aria-label="Filtrar por categoria">
+      <button class="pill active" data-cat="all">todas</button>
+      <button class="pill" data-cat="cme">CME / esterilização</button>
+      <button class="pill" data-cat="ars">resíduos</button>
+      <button class="pill" data-cat="visa">VISA por cidade</button>
+      <button class="pill" data-cat="acesso">acessibilidade</button>
+      <button class="pill" data-cat="norma">normas / RDC</button>
+      <button class="pill" data-cat="dimensao">dimensionamento</button>
+      <button class="pill" data-cat="acabamento">acabamentos</button>
+      <button class="pill" data-cat="infra">infraestrutura</button>
+      <button class="pill" data-cat="especial">especialidades</button>
+      <button class="pill" data-cat="negocio">negócio</button>
+    </div>
+
+    <div class="results-count" id="resultsCount" aria-live="polite"></div>
+    <div class="entry-list" id="entryList" role="list"></div>
+
+</main>
+
+<footer class="site-footer">
+  <span></span>ORBi Plataforma · Comunidade de arquitetos da saúde
+</footer>
+
+<script>
+// ── BASE DE CONHECIMENTO ──
+const DATA = [
+  {cat:"cme",q:"Com 1 consultório odontológico, a esterilização pode ficar dentro da sala?",a:"Sim. O Art. 25, Inciso I da RDC 1.002/2025 permite explicitamente uma bancada setorizada exclusiva para processamento de dispositivos médicos (esterilização) localizada dentro do próprio consultório. Essa opção é de uso exclusivo daquela unidade de atendimento.",refs:["RDC 1.002/2025, Art. 25, I"],esp:"Odontologia"},
+  {cat:"cme",q:"Com 2 consultórios odontológicos, preciso de 2 salas de CME de 4,80m² cada?",a:"Não necessariamente. Pela RDC 1.002/2025, você pode ter uma sala única de 4,80m² (mínimo) com barreira técnica (bancada divisória de 50cm) separando área suja de área limpa. Só se quiser salas fisicamente separadas é que cada uma precisa ter 4,80m² individualmente. O dimensionamento é feito por equipo: 0,50m² por equipo, respeitando o mínimo de 4,80m². Atenção: alguns estados (ex: PR) têm norma estadual mais restritiva que exige salas separadas — verificar a norma local.",refs:["RDC 1.002/2025","norma estadual quando aplicável"],esp:"Odontologia"},
+  {cat:"cme",q:"Pode ter barreira técnica no lugar de salas separadas de CME?",a:"Pela RDC 1.002/2025 federal, sim. A barreira técnica (bancada de 50cm) é aceita para separar área suja de limpa em sala única. Algumas VISAs estaduais (ex: PR) ainda exigem salas fisicamente separadas — checar sempre a norma local. O critério federal prevalece quando não há norma local mais restritiva.",refs:["RDC 1.002/2025"],esp:"Odontologia"},
+  {cat:"cme",q:"A área de paramentação pode ficar dentro da área suja da CME?",a:"Depende da VISA local. Em algumas cidades aceitam a paramentação dentro da área suja marcada por tracejado no projeto. Em outras, exigem que funcione como antecâmara separada. O ideal é confirmar com a VISA antes de protocolar. A tendência mais recente é exigir separação física.",refs:["RDC 50","RDC 1.002/2025"],esp:"Odontologia"},
+  {cat:"cme",q:"CME de clínica ginecológica: como deve ser a configuração mínima?",a:"Para ginecologia, considera-se CME simplificada. A estrutura mínima geralmente é aceita com área suja e área limpa. Já houve aprovação de CME um pouco menor que 4,80m² quando documentado o volume de material processado — mas vai de cada analista. O ideal é apresentar dimensões com justificativa de volume.",refs:["RDC 50"],esp:"Ginecologia"},
+  {cat:"cme",q:"Sala de coleta de sangue precisa de sanitário anexo?",a:"Pela RDC 978, sim — consta nos ambientes mínimos de posto de coleta. Mas o significado de 'anexo' é interpretado de formas diferentes: alguns analistas aceitam sanitário no mesmo corredor, outros exigem acesso interno pela sala. Para coleta exclusivamente de sangue, já houve tentativa de justificar a dispensa, mas a norma não distingue tipo de coleta. A estratégia mais segura é prever o sanitário com porta que dê para dentro da sala ou para o corredor adjacente.",refs:["RDC 978/2025"],esp:"Laboratório / Posto de coleta"},
+  {cat:"cme",q:"O que significa 'sanitário anexo' na RDC 978?",a:"A ANVISA tem um documento de Perguntas e Respostas da RDC 978 que esclarece que 'anexo' pode ser interpretado como sanitário próximo, não necessariamente com acesso direto pela sala. Há precedentes de aprovação com sanitário no corredor imediato. Mas há analistas que exigem acesso interno. Tenha o P&R da ANVISA à mão para fundamentar a argumentação.",refs:["RDC 978/2025","P&R ANVISA RDC 978"],esp:"Laboratório / Posto de coleta"},
+  {cat:"cme",q:"Qual foi o programa aprovado em Brasília para clínica odonto com 3 consultórios?",a:"Caso real aprovado seguindo a RDC 1.002/2025: 3 consultórios (equipos) — 1 sala de CME com barreira de 50cm na bancada (área suja + área limpa) — Recepção — Espera — Sanitário exclusivo para funcionários (exigido pela quantidade de equipos) — Sanitário PCD para público e funcionários — Copa com bomba a vácuo embaixo da pia — DML — Área técnica para o compressor.",refs:["RDC 1.002/2025","Caso aprovado Brasília — 2026"],esp:"Odontologia"},
+  {cat:"ars",q:"Posso usar o ARS do condomínio e dispensar o ARS próprio da clínica?",a:"Sim, desde que justificado adequadamente no relatório. Argumentos: volume de resíduo baixo, coleta diária ao final do expediente, e destinação ao ARS do prédio que atende as normas. Deve-se especificar: horário de coleta (após expediente, sem cruzar com pacientes), como os resíduos são acondicionados nos ambientes geradores até a coleta, e qual empresa especializada faz a destinação.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"ars",q:"Posso colocar as lixeiras de resíduo no DML?",a:"Não. Resíduo sólido de serviço de saúde (RSS) não pode ficar no DML. A alternativa é considerar os próprios ambientes geradores como abrigo temporário (até a coleta diária) e o ARS do condomínio como destinação final — justificando isso no relatório. O DML pode ser integrado ao expurgo com ampliação de área, mas não serve como abrigo de resíduos.",refs:["RDC 50","NBR 10004"],esp:"Geral"},
+  {cat:"ars",q:"Qual é o pé-direito mínimo do ARS?",a:"Não existe pé-direito mínimo específico para ARS nas normas federais. Analistas que exigem pé-direito mínimo estão indo além do que a norma determina. Caso aconteça, solicite que o analista aponte o dispositivo normativo que embasa a exigência.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"ars",q:"Para clínica odonto com geração baixa de resíduo, ARS é obrigatório?",a:"A norma não estabelece um volume mínimo de geração para dispensar o ARS. Para clínicas em condomínio com ARS coletivo, a estratégia é justificar no relatório que a geração é pequena, a coleta é diária, e o resíduo é encaminhado ao ARS do prédio. Já houve aprovações nesse formato. A chave é a justificativa técnica bem redigida.",refs:["RDC 50"],esp:"Odontologia"},
+  {cat:"ars",q:"Como redigir no relatório a destinação de resíduos sem ARS próprio?",a:"Modelo consagrado pela comunidade: informar que os resíduos RSS serão retirados dos ambientes geradores ao final do expediente (sem cruzamento com pacientes), acondicionados adequadamente, e encaminhados ao ARS do condomínio. Citar a empresa terceirizada responsável pela coleta e destinação final. A coleta diária é o argumento que sustenta a dispensa do abrigo intermediário próprio.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"visa",q:"Como está o prazo de aprovação na VISA de Cuiabá/MT?",a:"Cuiabá está com processo caótico. Por muito tempo ficou sem analista de PBA — entrou apenas um analista, mas a fila acumulada é enorme. Projetos têm ficado mais de 1 ano sem análise. Tudo está sendo recebido por e-mail, com muita demora na resposta. Membros relataram PBA de rede hospitalar com mais de 1 ano sem retorno.",refs:["Relato de membros — 2025/2026"],esp:"MT"},
+  {cat:"visa",q:"Como funciona a aprovação em Itabirito/MG?",a:"Aprovação em Itabirito é feita pelo estado (não pela prefeitura), o que tende a ser mais ágil que BH. Prazo médio relatado: 4–5 meses. São mais exigentes e o memorial descritivo tem formato diferente do municipal. Quando pedem alterações, respondem rapidamente. Caso aprovado: laboratório de tanatopraxia em aproximadamente 4–5 meses.",refs:["Relato de membros — 2026"],esp:"MG"},
+  {cat:"visa",q:"Como funciona a aprovação em BH/MG?",a:"BH aprova pelo sistema da prefeitura — não é o VISA DIGITAL federal. Para iniciar, enviar e-mail para dvsa.projetos@pbh.gov.br solicitando instruções e modelos de carimbo e memorial. Os prazos estão muito longos — membros relataram projetos com mais de 1 ano em análise sem retorno. A aprovação mais rápida registrada na comunidade foi uma clínica estética com 1 ano e 4 meses.",refs:["Relato de membros — 2026"],esp:"MG"},
+  {cat:"visa",q:"A VISA de Sorriso/MT e Lucas do Rio Verde/MT aprova ARS de baixa altura?",a:"Sim. Em Sorriso/MT e Lucas do Rio Verde/MT já foram aprovados ARS baixos (sem pé-direito convencional), desde que tenham: ralo, ponto de água, ponto de luz, porta com fechamento e tranca. A necessidade de tamanho maior depende do volume de RSS gerado — se vai abrigar bombona, dimensionar para ela caber.",refs:["Relato de membros — 2026"],esp:"MT"},
+  {cat:"visa",q:"Barueri/SP e Manaus/AM aceitam sanitário de sala de coleta no corredor?",a:"Resultados opostos: em Barueri/SP, a VISA não aceitou sanitário no corredor — exigiu acesso direto pela sala. Em Manaus/AM, aceitaram a solução do corredor. Reforça a importância de confirmar a interpretação local antes de protocolar, mesmo quando a norma federal é ambígua.",refs:["Relato de membros — 2025/2026"],esp:"Laboratório / Posto de coleta"},
+  {cat:"visa",q:"O que fazer quando a clínica fica em prédio sem elevador e no 2º andar?",a:"Opções: (1) Plataforma elevatória coberta — se houver espaço e viabilidade estrutural. (2) TAC (Termo de Ajustamento de Conduta) — quando o prédio já tem espaço previsto para elevador e o proprietário assina compromisso de instalar futuramente. Já foi aprovado nessa condição. (3) Análise prévia informal — em Porto Alegre e outros municípios, a VISA faz reunião informal antes do protocolo (sem contar como parecer) para orientar sobre viabilidade.",refs:["RDC 50","ABNT NBR 9050"],esp:"Geral"},
+  {cat:"visa",q:"Vila Velha/ES: como é a aprovação?",a:"Caso aprovado na comunidade: laboratório de tanatopraxia aprovado em Vila Velha/ES. Relato de que a VISA local é mais exigente e o memorial descritivo tem formato específico. Para projetos no ES fora de BH, a aprovação pode ser feita pelo estado, o que em alguns municípios é mais ágil.",refs:["Relato de membros — 2026"],esp:"ES"},
+  {cat:"acesso",q:"Escada caracol pode ser usada em clínica?",a:"Não. A RDC 50 é explícita: escada em leque (caracol) não é permitida em estabelecimentos de saúde. Não tem exceção. Não passa nem para áreas operacionais.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"acesso",q:"Mezanino com consultório precisa de elevador?",a:"Sim, se houver atendimento de pacientes no mezanino. O elevador precisa comportar maca. Se o mezanino for apenas para áreas técnicas (copa, DML, esterilização) sem atendimento direto de pacientes, há precedentes de aprovação sem elevador. Verificar com VISA local — MT, por exemplo, exige elevador para procedimentos em piso superior.",refs:["RDC 50","ABNT NBR 9050"],esp:"Geral"},
+  {cat:"acesso",q:"RDC 50 exige patamar a cada 2m em escadas?",a:"Sim. Já foi objeto de exigência em parecer de projeto com mezanino. Em projetos com desnível relevante, atentar para o espaçamento de patamares conforme a RDC 50.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"acesso",q:"Clínica no 2º andar — precisa apresentar planta do prédio todo ou só da clínica?",a:"Só a planta do pavimento onde a clínica está localizada, com hachura nas áreas que não pertencem à clínica. É importante mostrar acessos (escada, elevador), áreas de uso comum do andar (DML compartilhado, sanitários coletivos, se houver) e a implantação geral do pavimento. Plantas de outros andares não são necessárias.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"acesso",q:"O que é o TAC e quando ele resolve a falta de elevador?",a:"TAC é o Termo de Ajustamento de Conduta — um compromisso assinado pelo proprietário do prédio de instalar o elevador futuramente, quando o espaço já está estruturalmente previsto. Algumas VISAs aceitam o TAC como condição para aprovar a clínica no interim. Não é garantido em todos os municípios — verificar com a VISA local antes de recomendar ao cliente.",refs:["RDC 50","ABNT NBR 9050"],esp:"Geral"},
+  {cat:"norma",q:"A RDC 1.002/2025 substituiu as normas estaduais de odontologia?",a:"Não automaticamente. A norma federal prevalece, mas se houver norma estadual/municipal mais restritiva, esta continua valendo — aplica-se sempre a norma mais exigente. Ex: Brasília tinha norma local mais restritiva que a 1.002 para CME; após a publicação federal, a VISA local passou a seguir a 1.002. Mas isso varia por cidade. Sempre confirmar com a VISA local como estão interpretando a convivência das normas.",refs:["RDC 1.002/2025"],esp:"Odontologia"},
+  {cat:"norma",q:"Qual norma rege o posto de coleta de sangue?",a:"RDC 978/2025 (define ambientes mínimos de posto de coleta geral) e RDC 50 (dimensionamento). A RDC 978 passou a exigir sanitário anexo à sala de coleta — incluindo para coleta de sangue, embora a norma não distinga tipo de coleta. Complementar com documento de P&R da ANVISA para esclarecimento de pontos ambíguos.",refs:["RDC 978/2025","RDC 50"],esp:"Laboratório / Posto de coleta"},
+  {cat:"norma",q:"O que é a RDC 51/2011 e quando ela é pedida?",a:"A RDC 51 regula estabelecimentos de saúde que não atendem integralmente às normas por limitação física ou de retrofit. Quando a VISA identifica uma não conformidade sem solução viável, pode solicitar uma Declaração de Não Conformidade — listando cada item que não será atendido e qual medida compensatória será adotada. É pedido formalmente em pareceres. A declaração deve ser específica: citar o artigo, o desvio e a compensação.",refs:["RDC 51/2011"],esp:"Geral"},
+  {cat:"norma",q:"Qual norma regulamenta o RX panorâmico odontológico?",a:"Não há norma única e específica para o panorâmico. A prática consolidada é usar o manual do fabricante como base para dimensionamento da sala (distâncias mínimas ao redor do equipamento) e a RDC 611/2022 (radiodiagnóstico) para blindagem. Para a parede: argamassa baritada. Acionamento sempre do lado de fora com porta com visor plumbífero. O panorâmico pode ficar mais próximo da parede traseira que equipamentos maiores — validar no manual do fabricante.",refs:["RDC 611/2022","Manual do fabricante"],esp:"Odontologia / Radiologia"},
+  {cat:"norma",q:"CNAE incompatível com procedimentos: o que acontece na aprovação?",a:"Quando o contador registra um CNAE que não corresponde aos procedimentos que serão realizados na clínica, o processo de aprovação sanitária pode ser bloqueado ou indeferido por incompatibilidade. A VISA verifica se o CNAE do CNPJ é compatível com a atividade declarada no projeto. Caso o contador tenha omitido ou classificado errado, é necessário regularizar o CNAE antes de protocolar o PBA.",refs:["VISA / Receita Federal"],esp:"Processo"},
+  {cat:"dimensao",q:"Qual é a metragem mínima para sala de soroterapia com 1 poltrona?",a:"Mínimo de 11,5m² para 1 poltrona: 5,5m² para a área da poltrona + 6m² para o posto de enfermagem. O posto de enfermagem precisa ter visão direta para as poltronas — pode ser através de vidro fixo entre ambientes, com bancada de trabalho voltada para o vidro.",refs:["RDC 50"],esp:"Clínica médica / Soroterapia"},
+  {cat:"dimensao",q:"O posto de enfermagem em sala de soroterapia pode ficar em sala separada?",a:"Sim, desde que haja visão direta para as poltronas — geralmente por janela fixa ou vidro entre ambientes, com a bancada da enfermagem voltada para o vidro. Já foi aprovado assim em Brasília. A enfermagem precisa conseguir observar todos os pacientes em infusão.",refs:["RDC 50"],esp:"Clínica médica / Soroterapia"},
+  {cat:"dimensao",q:"Copa é obrigatória em consultório odontológico?",a:"Não. A copa não é item obrigatório pela RDC 1.002/2025. Se o projeto optar por incluí-la, deve respeitar a área mínima — referência de mercado: 2 a 3m². Pode ser um módulo embutido em armário, desde que com dimensões adequadas.",refs:["RDC 1.002/2025"],esp:"Odontologia"},
+  {cat:"dimensao",q:"Sala de injetáveis precisa de maca? E de sala de utilidades?",a:"Maca de emergência: sim, obrigatória — para resposta a intercorrências com aplicação venosa. Sala de utilidades: só é necessária se houver material que precise ser lavado e descontaminado. Se todos os materiais utilizados forem descartáveis, a sala de utilidades é dispensável — basta informar no relatório.",refs:["RDC 50"],esp:"Clínica médica / Injetáveis"},
+  {cat:"dimensao",q:"Triagem antes de injetáveis precisa ser em sala separada?",a:"Não. A triagem pode ser feita na própria sala de infusão (checagem de sinais vitais antes da aplicação). Algumas clínicas optam por sala de triagem separada para organização do fluxo de atendimento, mas não há exigência normativa para isso.",refs:["RDC 50"],esp:"Clínica médica / Injetáveis"},
+  {cat:"dimensao",q:"Onde colocar o compressor da cadeira odontológica?",a:"Preferencialmente externo, com ventilação adequada. Pode ser em área técnica separada — já foram aprovados compressores embaixo da pia da copa com ventilação para área externa. Evitar instalar dentro do consultório sem ventilação adequada.",refs:["RDC 1.002/2025"],esp:"Odontologia"},
+  {cat:"acabamento",q:"É obrigatório revestimento cerâmico em todas as paredes de CME, DML e copa?",a:"Não. A RDC 50 exige apenas que as superfícies sejam laváveis, lisas e impermeáveis. Tinta acrílica lavável aplicada nas paredes que não são de bancada é aceita pela maioria das VISAs. Recomenda-se cerâmica nas paredes de bancada (mais sujeitas a respingos), e argumentar no relatório que as demais são pinturas laváveis. Alguns analistas pedem cerâmica em toda a extensão — depende da cidade.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"acabamento",q:"Pode usar revestimento cerâmico só até meia parede nos sanitários?",a:"Sim, é aceito na maioria das VISAs, desde que a parte superior seja pintura lavável. A RDC 50 não especifica altura de revestimento, apenas que a superfície seja lavável. Para sanitários, alguns analistas mais rigorosos pedem cerâmica integral — vale a pena perguntar antes ou colocar integral para evitar exigência.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"acabamento",q:"Cuba de sobrepor em lavatório de clínica estética gera exigência da VISA?",a:"Geralmente não. O que importa é que a vedação entre a cuba e a bancada seja adequada e que a higienização seja viável. Descrevendo bem no relatório, costuma ser aceito. Em Brasília já foi aprovado sem exigência.",refs:["RDC 50"],esp:"Clínica estética"},
+  {cat:"acabamento",q:"Ralo é obrigatório em todas as salas de atendimento?",a:"Não — o oposto: ralo é PROIBIDO em salas onde pacientes são atendidos. Deve ser previsto em DML, sanitários e áreas de utilidades. Em sala de coleta de sangue também não pode, pois se trata de procedimento invasivo. Quando a norma fala em superfícies 'laváveis', significa passível de limpeza intensa — não que se vai jogar água no piso.",refs:["RDC 50","RDC 978/2025"],esp:"Geral"},
+  {cat:"acabamento",q:"Frigobar pode ser instalado em sala odontológica?",a:"Sim, pode.",refs:["RDC 1.002/2025"],esp:"Odontologia"},
+  {cat:"infra",q:"Clínica com procedimentos invasivos precisa de sistema de energia de emergência?",a:"Sim. Para procedimentos invasivos (incluindo mini-cirurgias em odontologia), a VISA geralmente exige elétrica de emergência. A solução mais comum é no-break com bateria de autonomia suficiente para o procedimento mais longo realizado. O tamanho do no-break deve ser dimensionado por engenheiro elétrico conforme a carga e autonomia necessária. Gerador do edifício pode complementar, mas o no-break é o mais comum para clínicas.",refs:["RDC 50","ABNT NBR 13534"],esp:"Geral"},
+  {cat:"infra",q:"CME precisa de ar condicionado especial ou o convencional serve?",a:"Ar condicionado convencional é aceito na CME de clínicas. O padrão adotado é: split convencional + exaustor na área molhada (expurgo). Não há exigência de sistema de pressão negativa para CME de clínicas, ao contrário do que se aplica a centros cirúrgicos hospitalares.",refs:["RDC 50"],esp:"Geral"},
+  {cat:"especial",q:"Implante capilar precisa de CCA?",a:"Depende de como o procedimento é classificado. O CFM trata o implante capilar como procedimento tipo 2 quando realizado com sedação de longa duração — nesse caso exige CCA. A sala cirúrgica do CCA tem 20m² mínimos sozinha, além de vestiário de barreira, sanitário, área de escovação, RPA, posto de enfermagem, DML exclusivo e área de recepção de pacientes. Clientes que querem isso em 50m² não têm condições sem eliminar procedimentos que exigem sedação.",refs:["CFM","RDC 50"],esp:"Estética / Capilar"},
+  {cat:"especial",q:"Spa tem norma específica da VISA?",a:"Não há norma específica para spa. A orientação é trabalhar como ambiente de saúde e bem-estar, prevendo os ambientes de apoio que a rotina exige: DML, sanitários/vestiários adequados, áreas de higiene conforme os tratamentos oferecidos. O dimensionamento pode se basear na RDC 50 como referência. O foco deve ser a experiência do paciente e quais ambientes sustentam essa experiência.",refs:["RDC 50 (referência)"],esp:"Estética / Spa"},
+  {cat:"especial",q:"Farmácia de manipulação de injetáveis tem infraestrutura diferente da farmácia comum?",a:"A infraestrutura base é a mesma da farmácia de manipulação, mas injetáveis têm requisitos mais rígidos de controle de contaminação. Para injetáveis como mounjaro, a lógica é de farmácia de manipulação com exigências de esterilidade mais rigorosas. Recomenda-se envolver farmacêutico responsável para definir equipamentos e fluxos antes de desenvolver o projeto arquitetônico.",refs:["ANVISA — RDC de farmácias"],esp:"Farmácia"},
+  {cat:"especial",q:"Residência de idosos: lavanderia precisa ser hospitalar?",a:"Quando a lavanderia processa apenas roupas dos próprios residentes (serviço interno), lavanderia convencional é aceita — máquina, tanque, bancada. Se o serviço de lavanderia for oferecido para terceiros ou tiver volume hospitalar, aí pode ser exigida estrutura hospitalar. O número de moradores é argumento para dimensionar a necessidade.",refs:["RDC 50","RDC 283/2005"],esp:"ILPI / Residência de idosos"},
+  {cat:"especial",q:"Ozonioterapia: como nomear e enquadrar no projeto?",a:"Atenção: ozonioterapia não é um procedimento liberado pela ANVISA para uso geral — tem apenas 2 aplicações autorizadas. Usar o termo no projeto pode gerar problema na análise. Já houve bronca de analista por citar ozonioterapia no memorial. O enquadramento correto depende do procedimento real que será realizado. Consultar a ANVISA ou descrever o procedimento pelo nome técnico sem citar o termo ozonioterapia.",refs:["ANVISA"],esp:"Clínica estética"},
+  {cat:"especial",q:"Clínica odonto com RX panorâmico: o equipamento pode encostar na parede?",a:"Para o RX panorâmico, a lógica de afastamento é diferente dos equipamentos maiores de radiodiagnóstico. O equipamento pode ficar mais próximo da parede traseira — similar à lógica da mamografia. A exigência maior costuma ser para laterais e frente. Validar sempre no manual do fabricante específico.",refs:["RDC 611/2022","Manual do fabricante"],esp:"Odontologia / Radiologia"},
+  {cat:"especial",q:"HOF (harmonização orofacial): pode basear o projeto na RDC 1.002/2025?",a:"Sim. Infraestrutura segue a RDC 1.002/2025. Para classificação de procedimentos, usar a Resolução CFO 286 que classifica os procedimentos de HOF por tipo. A norma odontológica se aplica à estrutura; a norma do CFO define quais ambientes são necessários conforme os procedimentos realizados.",refs:["RDC 1.002/2025","CFO 286"],esp:"Odontologia / HOF"},
+  {cat:"especial",q:"Biópsia de mama pode ser realizada dentro do consultório?",a:"Sim, pode ser feita no próprio consultório — geralmente guiada por ultrassom. Verificar se a anestesia usada é local: se for anestesia local, é tranquilo para aprovação como procedimento ambulatorial em consultório. O consultório deve ter dimensão adequada para acomodar o equipamento de ultrassom. Já houve aprovação de sala de ultrassom para procedimentos guiados por imagem.",refs:["RDC 50"],esp:"Ginecologia / Mastologia"},
+  {cat:"especial",q:"Ninfoplastia pode ser realizada em sala de procedimento sem CCA?",a:"Há casos aprovados com anestesia local e sem sedação, em sala de procedimento convencional — sem CCA. A condição é que o procedimento seja descrito como realizado exclusivamente com anestesia local, sem sedação, e com alta logo após. A decisão de não estruturar como CCA é do médico responsável, que assume o risco técnico. Do ponto de vista arquitetônico, apresenta-se como sala de procedimentos.",refs:["CFM","RDC 50"],esp:"Ginecologia"},
+  {cat:"especial",q:"Clínica de geriatria com sala de injetáveis: quais ambientes são necessários?",a:"Maca de emergência obrigatória na sala de injetáveis. Sala de utilidades: só se houver material não descartável que precise ser lavado/descontaminado. Triagem: não precisa de sala separada — pode ser feita dentro da própria sala de infusão (verificação de sinais vitais). Posto de enfermagem com visão para as poltronas.",refs:["RDC 50"],esp:"Geriatria / Injetáveis"},
+  {cat:"especial",q:"Farmácia de quimioterápicos: estrutura é parecida com a de injetáveis?",a:"A estrutura de farmácia de quimioterápicos é comparável em exigência — manipulação de produtos químicos de alto risco, com controle rigoroso de contaminação. Já foi aprovado em BH. A grande diferença está nos EPIs, fluxos de descarte e sistemas de ventilação com pressão negativa. Envolver farmacêutico e engenheiro de segurança desde o início do projeto.",refs:["ANVISA — RDC de farmácias","CREA"],esp:"Farmácia"},
+  {cat:"negocio",q:"É necessário apresentar planta do prédio inteiro quando a clínica está em um andar?",a:"Não. Apresenta-se a planta do pavimento onde a clínica está localizada, com hachura nas áreas que não pertencem à clínica. É importante mostrar acessos (escada, elevador), áreas de uso comum do andar (DML compartilhado, sanitários coletivos, se houver) e a implantação geral do pavimento.",refs:["RDC 50"],esp:"Processo"},
+  {cat:"negocio",q:"Como agir quando o analista da VISA exige algo que não está na norma?",a:"Solicitar que o analista indique o dispositivo normativo que embasa a exigência. Se não houver base, é possível recorrer à VISA estadual para uma segunda opinião. Uma estratégia mais pragmática (especialmente em prazos apertados) é acatar a exigência se o custo for menor que o desgaste de argumentar — mas documentar para casos futuros. Relato da comunidade: analista que exigia pé-direito mínimo para ARS sem nenhuma norma que sustente.",refs:["RDC 50","RDC 51/2011"],esp:"Processo"},
+  {cat:"negocio",q:"Como funciona a Declaração de Não Conformidade da RDC 51?",a:"A declaração deve listar cada item que não será atendido, citar o artigo/inciso da norma que exige aquele requisito, e descrever a medida compensatória adotada. Não é uma carta genérica — é item a item. Geralmente é pedida em parecer quando a VISA identifica uma não conformidade que não tem solução dentro das limitações físicas do espaço. Em muitos projetos, as não conformidades já são apresentadas pro-ativamente no próprio memorial/relatório.",refs:["RDC 51/2011"],esp:"Processo"},
+];
+
+// ── RENDERIZAÇÃO BASE ──
+const catLabels = {cme:'CME',ars:'Resíduos',visa:'VISA',acesso:'Acessibilidade',norma:'Normas',dimensao:'Dimensionamento',acabamento:'Acabamentos',infra:'Infraestrutura',especial:'Especialidade',negocio:'Negócio'};
+let activeCat = 'all', searchTerm = '';
+
+function renderBase() {
+  const q = searchTerm.toLowerCase();
+  const filtered = DATA.filter(d => {
+    const catOk = activeCat === 'all' || d.cat === activeCat;
+    const textOk = !q || [d.q, d.a, d.esp||'', ...d.refs].join(' ').toLowerCase().includes(q);
+    return catOk && textOk;
+  });
+  document.getElementById('totalN').textContent = DATA.length;
+  const rc = document.getElementById('resultsCount');
+  rc.textContent = (q || activeCat !== 'all') ? filtered.length + ' resultado' + (filtered.length!==1?'s':'') + ' encontrado' + (filtered.length!==1?'s':'') : '';
+  const list = document.getElementById('entryList');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>Nenhuma dúvida encontrada.<br>Tente outro termo ou categoria.</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map((d,i) => {
+    const refs = d.refs.map(r=>`<span class="ref-tag">${r}</span>`).join('');
+    const esp = d.esp ? `<span class="esp-tag">${d.esp}</span>` : '';
+    return `<div class="entry" id="e${i}" role="listitem">
+      <div class="entry-head" onclick="toggleEntry(${i})" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleEntry(${i})">
+        <span class="entry-cat cat-${d.cat}">${catLabels[d.cat]||d.cat}</span>
+        <span class="entry-q">${d.q}</span>
+        <span class="entry-chevron" aria-hidden="true">&#8964;</span>
+      </div>
+      <div class="entry-body">
+        <div class="entry-answer">${d.a}</div>
+        <div class="entry-footer">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          ${refs}${esp}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEntry(i) {
+  const el = document.getElementById('e'+i);
+  const head = el.querySelector('.entry-head');
+  const open = el.classList.toggle('open');
+  head.setAttribute('aria-expanded', open);
+}
+
+const si = document.getElementById('searchInput');
+si.addEventListener('input', function() { searchTerm = this.value; renderBase(); });
+si.addEventListener('focus', function() { this.style.borderColor='#F5C400'; });
+si.addEventListener('blur',  function() { this.style.borderColor='rgba(255,255,255,0.12)'; });
+document.getElementById('filterCats').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (!pill) return;
+  document.querySelectorAll('#filterCats .pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  activeCat = pill.dataset.cat;
+  renderBase();
+});
+
+// ── INIT ──
+renderBase();
+</script>
+</body>
+</html>
